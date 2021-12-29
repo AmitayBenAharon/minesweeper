@@ -1,0 +1,105 @@
+import java.util.Random;
+
+/**
+ *
+ * @author User
+ */
+public class Shole {
+
+    public int board[][];
+    public int emptyOpenField = 2;
+    public int mine = 1;
+    public int emptyClosedField = 0;
+    public int NumOfMines;
+    public int emptyFields;
+
+    private void valuesAreValid(int col, int row, int NoOfMines) throws Exception {
+        if (col <= 1 || col > 50 || row <= 1 || row > 50) {
+            throw new IllegalArgumentException("The board is too big, try entering smaller boundries");
+        }
+        if (NoOfMines > 100 || NoOfMines <= 0) {
+            throw new IllegalArgumentException("Too many mines, please enter less");
+        }
+        if (((col * row) - NoOfMines) <= 0) {
+            throw new IllegalArgumentException("Too many mines, please enter less");
+        }
+        createBoard(col, row, NoOfMines);
+    }
+
+    public void createBoard(int col, int row, int NoOfMines) {
+        NumOfMines = NoOfMines;
+        emptyFields = ((col * row) - NoOfMines);
+        Random rnd = new Random();
+        board = new int[col][row];
+
+        while (NoOfMines > 0) {
+            int currentCol = rnd.nextInt(col);
+            int currentRow = rnd.nextInt(col);
+            if (board[currentCol][currentRow] != mine) {
+                board[currentCol][currentRow] = mine;
+                NoOfMines--;
+            }
+        }
+    }
+
+    public int checkNoOfMines(int col, int row) {
+        int count = 0;
+
+        for (int currentCol = col - 1; currentCol <= col + 1; currentCol++) {
+            for (int currentRow = row - 1; currentRow <= row + 1; currentRow++) {
+                if (currentCol >= 0 && currentRow >= 0 && currentCol < board.length && currentRow < board.length) {
+                    if (!(currentCol == col && currentRow == row)) {
+                        count += board[currentCol][currentRow];
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    public void openEmptyFields(int col, int row) {
+        for (int currentCol = col - 1; currentCol <= col + 1; currentCol++) {
+            for (int currentRow = row - 1; currentRow <= row + 1; currentRow++) {
+                if (currentCol >= 0 && currentRow >= 0 && currentCol < board.length && currentRow < board.length) {
+                    if (!(currentCol == col && currentRow == row)) {
+                        if (checkNoOfMines(currentCol, currentRow) == 0) {
+                            openEmptyFields(currentCol, currentRow);
+                            board[currentCol][currentRow] = emptyOpenField;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void boom(int col, int row) {
+        if (board[col][row] == 1) {
+            for (int currentCol = 0; currentCol < board.length; currentCol++) {
+                for (int currentRow = 0; currentRow < board.length; currentRow++) {
+                    board[currentCol][currentRow] = emptyClosedField;
+                }
+            }
+            //send an message that says "game over" 
+        }
+    }
+
+    public void win() {
+        int empty = 0;
+        for (int currentCol = 0; currentCol < board.length; currentCol++) {
+            for (int currentRow = 0; currentRow < board.length; currentRow++) {
+                if (board[currentCol][currentRow] == emptyOpenField) {
+                    empty++;
+                }
+            }
+        }
+        if (empty == emptyFields) {
+            //send an message that says "you win!"
+            for (int currentCol = 0; currentCol < board.length; currentCol++) {
+                for (int currentRow = 0; currentRow < board.length; currentRow++) {
+                    board[currentCol][currentRow] = emptyClosedField;
+                }
+            }
+        }
+    }
+
+}
